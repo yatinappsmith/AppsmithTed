@@ -15,12 +15,31 @@ ENV MYSQL_USER=admin \
     REPLICATION_SLAVE=**False** \
     REPLICATION_USER=replica \
     REPLICATION_PASS=replica
+ENV MONGODB_VERSION=5.0
+#    MONGODB_USER=admin \
+#    MONGODB_PASS=**Random** \
+#    MONGODB_DATABASE=admin \
+#    MONGODB_REPLICASET=**None**
 
 # install mariadb
 
 # install packages
 RUN apt-get update
-RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales \
+RUN apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common \
+    wget
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add -  && \
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/$MONGODB_VERSION multiverse" | tee /etc/apt/sources.list.d/mongodb-org-$MONGODB_VERSION.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        mongodb-org \
+        && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales vim\
 && rm -rf /var/lib/apt/lists/*
 
 
@@ -86,6 +105,13 @@ RUN /populatepostgres.sh
 #RUN psql -U docker -d docker -f /tmp/pgdump.sql
 
 USER root
+#configure mongodb
+RUN sed -i 's/^\( *bindIp *: *\).*/\10.0.0.0/' /etc/mongod.conf
+
+
+
+
+
 # Expose the PostgreSQL port
 EXPOSE 5432 3306 3307
 
@@ -95,7 +121,7 @@ COPY startupscript.sh /startupscript.sh
 #RUN chmod +x /startupscript.sh
 
 # Add VOLUMEs to allow backup of config, logs and databases
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql","/var/lib/mysql"]
+VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql","/var/lib/mysql" ,"/data/db","/data/configdb","/data/logs","/data/backup/mongodb"]
 
 # copy supervisor conf
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
