@@ -1,5 +1,6 @@
 from flask import Flask
 import mysql.connector
+import os
 
 app = Flask(__name__)
 mydb = mysql.connector.connect(
@@ -23,6 +24,11 @@ def mysql_health():
     mycursor.execute("SELECT * FROM users")
     myresult = mycursor.fetchall()
     return myresult.__str__()
+
+@app.route('/killmysql',methods = ['GET'])
+def kill_mysql():
+    os.system("kill $(ps -ef |grep mysqld|grep -v grep |awk '{print $2}')")
+    return "killed"
 
   
 if __name__ == "__main__":

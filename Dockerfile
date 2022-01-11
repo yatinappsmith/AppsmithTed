@@ -80,6 +80,8 @@ RUN /etc/init.d/mysql start &&\
 COPY mysql/mysqlinitdb.sql /tmp/mysqlinitdb.sql
 COPY populatemysql.sh /populatemysql.sh
 RUN /populatemysql.sh
+COPY mysql/startmysql.sh /startmysql.sh
+RUN chmod a+x /startmysql.sh
 
 # setup postgresql
 USER postgres
@@ -119,6 +121,7 @@ RUN mkdir /restserver
 ADD restserver/restserver.py /restserver/restserver.py
 ADD restserver/requirements.txt /restserver/requirements.txt
 RUN pip install -r /restserver/requirements.txt
+COPY restserver/startrestserver.sh /startrestserver.sh
 
 
 
