@@ -107,13 +107,20 @@ RUN /populatepostgres.sh
 USER root
 #configure mongodb
 RUN sed -i 's/^\( *bindIp *: *\).*/\10.0.0.0/' /etc/mongod.conf
+RUN /usr/bin/mongod --config /etc/mongod.conf --dbpath /var/lib/mongodb/ --logpath /var/log/mongodb/mongod.log &
+#RUN sleep 10
+RUN mkdir -p /sample_airbnb/sample_airbnb
+COPY mongo/* /sample_airbnb/sample_airbnb/
+#Initialize mongodb with sample data
+#RUN mongorestore --db sample_airbnb /sample_airbnb/sample_airbnb
 
 
 
 
 
-# Expose the PostgreSQL port
-EXPOSE 5432 3306 3307
+
+# Expose the port
+EXPOSE 5432 3306 3307 27017
 
 
 
