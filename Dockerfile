@@ -39,7 +39,7 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add -
         mongodb-org \
         && rm -rf /var/lib/apt/lists/*
 RUN apt-get update
-RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales vim\
+RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales vim python python3-pip\
 && rm -rf /var/lib/apt/lists/*
 
 
@@ -76,6 +76,7 @@ RUN /etc/init.d/mysql start &&\
     sleep 10 &&\
     echo "CREATE USER 'root'@'%' IDENTIFIED BY 'root';GRANT ALL ON *.* TO root@'%'; FLUSH PRIVILEGES" | mysql &&\
     echo "CREATE USER 'newuser'@'%' IDENTIFIED BY 'root_password';GRANT ALL ON *.* TO newuser@'%'; FLUSH PRIVILEGES" | mysql
+    #echo "SET PASSWORD FOR 'root'@localhost = PASSWORD(\"root\"); FLUSH PRIVILEGES" | mysql
 COPY mysql/mysqlinitdb.sql /tmp/mysqlinitdb.sql
 COPY populatemysql.sh /populatemysql.sh
 RUN /populatemysql.sh
@@ -111,8 +112,14 @@ RUN /usr/bin/mongod --config /etc/mongod.conf --dbpath /var/lib/mongodb/ --logpa
 #RUN sleep 10
 RUN mkdir -p /sample_airbnb/sample_airbnb
 COPY mongo/* /sample_airbnb/sample_airbnb/
-#Initialize mongodb with sample data
-#RUN mongorestore --db sample_airbnb /sample_airbnb/sample_airbnb
+
+
+#setup python packages
+RUN mkdir /restserver
+ADD restserver/restserver.py /restserver/restserver.py
+ADD restserver/requirements.txt /restserver/requirements.txt
+RUN pip install -r /restserver/requirements.txt
+
 
 
 
@@ -120,7 +127,7 @@ COPY mongo/* /sample_airbnb/sample_airbnb/
 
 
 # Expose the port
-EXPOSE 5432 3306 3307 27017
+EXPOSE 5432 3307 27017 5001
 
 
 
