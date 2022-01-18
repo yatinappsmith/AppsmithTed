@@ -42,6 +42,11 @@ RUN apt-get update
 RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales vim python python3-pip\
 && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && \
+    apt-get install -y exim4-daemon-light telnet && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    find /var/log -type f | while read f; do echo -ne '' > $f; done;
 
 # make /var/run/sshd
 RUN mkdir /var/run/sshd
@@ -124,18 +129,35 @@ RUN pip install -r /restserver/requirements.txt
 COPY restserver/startrestserver.sh /startrestserver.sh
 
 
+#Setup smtp server
+#COPY entrypoint.sh /bin/
+#COPY exim/set-exim4-update-conf.sh /bin/
+COPY exim/update-exim4.conf.conf /etc/exim4/update-exim4.conf.conf
+#COPY exim/set-exim4-update-conf.sh /bin/set-exim4-update-conf.sh
+#RUN chmod a+x /bin/set-exim4-update-conf.sh
+#COPY exim/setupexim4.sh /bin/setupexim4.sh
+#RUN chmod a+x /bin/setupexim4.sh
+
+
+
+#RUN chmod a+x /bin/entrypoint.sh && 
+#RUN chmod a+x /bin/set-exim4-update-conf
+
+
+
+
 
 
 
 
 
 # Expose the port
-EXPOSE 5432 3307 27017 5001
+EXPOSE 3306 5432 3307 27017 5001 25
 
 
 
 COPY startupscript.sh /startupscript.sh
-#RUN chmod +x /startupscript.sh
+RUN chmod +x /startupscript.sh
 
 # Add VOLUMEs to allow backup of config, logs and databases
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql","/var/lib/mysql" ,"/data/db","/data/configdb","/data/logs","/data/backup/mongodb"]
