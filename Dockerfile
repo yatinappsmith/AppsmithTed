@@ -39,7 +39,7 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add -
         mongodb-org \
         && rm -rf /var/lib/apt/lists/*
 RUN apt-get update
-RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales vim python python3-pip\
+RUN apt-get install --no-install-recommends -y openssh-server software-properties-common postgresql-12 postgresql-client-12 postgresql-contrib mariadb-server supervisor lsof  telnet net-tools locales vim python python3-pip git\
 && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
@@ -107,7 +107,7 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/12/main/pg_hba.con
 RUN echo "listen_addresses='*'" >> /etc/postgresql/12/main/postgresql.conf
 COPY postgres/pgdump.sql /tmp/pgdump.sql
 COPY populatepostgres.sh /populatepostgres.sh
-#RUN chmod +x /populatepostgres.sh
+#RUN chmod a+x /populatepostgres.sh
 RUN /populatepostgres.sh
 
 #RUN psql -U docker -d docker -f /tmp/pgdump.sql
@@ -138,6 +138,19 @@ COPY exim/update-exim4.conf.conf /etc/exim4/update-exim4.conf.conf
 #COPY exim/setupexim4.sh /bin/setupexim4.sh
 #RUN chmod a+x /bin/setupexim4.sh
 
+#Setup Git server
+RUN ssh-keygen -A
+WORKDIR /git-server/
+RUN mkdir /git-server/keys 
+RUN adduser  --shell /usr/bin/git-shell git 
+RUN echo git:12345 | chpasswd
+RUN mkdir /home/git/.ssh
+
+
+COPY git-server/git-shell-commands /home/git/git-shell-commands
+COPY git-server/sshd_config /etc/ssh/sshd_config
+COPY git-server/start.sh start.sh
+
 
 
 #RUN chmod a+x /bin/entrypoint.sh && 
@@ -152,7 +165,7 @@ COPY exim/update-exim4.conf.conf /etc/exim4/update-exim4.conf.conf
 
 
 # Expose the port
-EXPOSE 3306 5432 3307 27017 5001 25
+EXPOSE 3306 5432 3307 27017 5001 25 22
 
 
 

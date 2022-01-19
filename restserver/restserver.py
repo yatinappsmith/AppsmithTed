@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 import mysql.connector
 import os
 
@@ -29,6 +29,12 @@ def mysql_health():
 def kill_mysql():
     os.system("kill $(ps -ef |grep mysqld|grep -v grep |awk '{print $2}')")
     return "killed"
+
+@app.route('/addgitssh',methods = ['GET'])
+def add_sshkey():
+    sshkey = request.args.get("sshkey")
+    os.system("echo '"+sshkey+"' >> /home/git/.ssh/authorized_keys")
+    return sshkey
 
   
 if __name__ == "__main__":
