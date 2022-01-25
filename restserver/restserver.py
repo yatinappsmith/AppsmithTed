@@ -19,24 +19,7 @@ mycursor = mydb.cursor()
 fake = Faker(['it_IT', 'en_US', 'ja_JP', 'es_ES', 'de_DE', 'ar_AA'])
 student_data =[]
 
-for i in range(0, 10000):
-    new_student_data = {}
-    new_student_data['id'] = i +1# randint(1, 1000)
-    new_student_data['name'] = fake.name()
-    new_student_data['address'] = fake.address()
-    new_student_data['latitude'] = str(fake.latitude())
-    new_student_data['longitude'] = str(fake.longitude())
-    new_student_data['phone'] = fake.phone_number()
-    new_student_data['email'] = fake.email()
-    new_student_data['company'] = fake.company()
-    new_student_data['job'] = fake.job()
-    new_student_data['image'] = fake.image_url()
-    new_student_data['text'] = fake.text()
-    new_student_data['ssn'] = fake.ssn()
-    new_student_data['credit_card'] = fake.credit_card_number()
-    new_student_data['iban'] = fake.iban()
-    new_student_data['postalcode'] = fake.postalcode()
-    student_data.append(new_student_data)
+
 
   
 @app.route('/')
@@ -63,6 +46,37 @@ def add_sshkey():
     sshkey = request.args.get("sshkey")
     os.system("echo '"+sshkey+"' >> /home/git/.ssh/authorized_keys")
     return sshkey
+
+@app.route('/addrepo',methods = ['GET'])
+def add_repo():
+    reponame = request.args.get("reponame")
+    os.system("cd /git-server/repos;mkdir '"+reponame+"';cd '"+reponame+"';git init --shared=true;touch a.txt;git add a.txt;git commit -m myfirstcommit")
+    return reponame
+
+
+@app.route('/generaterecords',methods = ['GET'])
+def generate_records():
+    records = int(request.args.get("records"))
+    for i in range(0, records):
+        new_student_data = {}
+        new_student_data['id'] = i + 1  # randint(1, 1000)
+        new_student_data['name'] = fake.name()
+        new_student_data['address'] = fake.address()
+        new_student_data['latitude'] = str(fake.latitude())
+        new_student_data['longitude'] = str(fake.longitude())
+        new_student_data['phone'] = fake.phone_number()
+        new_student_data['email'] = fake.email()
+        new_student_data['company'] = fake.company()
+        new_student_data['job'] = fake.job()
+        new_student_data['image'] = fake.image_url()
+        new_student_data['text'] = fake.text()
+        new_student_data['ssn'] = fake.ssn()
+        new_student_data['credit_card'] = fake.credit_card_number()
+        new_student_data['iban'] = fake.iban()
+        new_student_data['postalcode'] = fake.postalcode()
+        student_data.append(new_student_data)
+    return jsonify(records)
+
 
 @app.route('/getstudents',methods = ['GET'])
 def get_students():
