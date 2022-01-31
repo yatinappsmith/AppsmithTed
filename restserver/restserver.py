@@ -19,44 +19,44 @@ mycursor = mydb.cursor()
 fake = Faker(['it_IT', 'en_US', 'ja_JP', 'es_ES', 'de_DE', 'ar_AA'])
 student_data =[]
 
-
-
   
 @app.route('/')
 def hello():
-    return "Welcome to Appsmithted"
+    return "Welcome to Appsmith Ted"
 
 @app.route('/health',methods = ['POST', 'GET'])
 def health():
-    return "I am healthy2"
+    return "I am healthy"
 
-@app.route('/mysql/health',methods = ['POST', 'GET'])
+@app.route('/v1/mysql/health',methods = ['POST', 'GET'])
 def mysql_health():
     mycursor.execute("SELECT * FROM users")
     myresult = mycursor.fetchall()
     return myresult.__str__()
 
-@app.route('/killmysql',methods = ['GET'])
+@app.route('/v1/noise/killmysql',methods = ['GET'])
 def kill_mysql():
     os.system("kill $(ps -ef |grep mysqld|grep -v grep |awk '{print $2}')")
     return "killed"
 
-@app.route('/addgitssh',methods = ['GET'])
+@app.route('/v1/gitserver/addgitssh',methods = ['GET'])
 def add_sshkey():
     sshkey = request.args.get("sshkey")
     os.system("echo '"+sshkey+"' >> /home/git/.ssh/authorized_keys")
     return sshkey
 
-@app.route('/addrepo',methods = ['GET'])
+@app.route('/v1/gitserver/addrepo',methods = ['GET'])
 def add_repo():
     reponame = request.args.get("reponame")
-    os.system("cd /git-server/repos;mkdir '"+reponame+"';cd '"+reponame+"';git init --shared=true;touch a.txt;git add a.txt;git commit -m myfirstcommit")
-    return reponame
+    os.system("cd /git-server/repos;mkdir '"+reponame+"';cd '"+reponame+"';git init --shared=true;git add .;git commit -m README;cd ..;git clone --bare '"+reponame+"' '"+reponame+"'.git")
+
+    return "ssh://git@host.docker.internal:2222/git-server/repos/"+reponame+".git"
 
 
-@app.route('/generaterecords',methods = ['GET'])
+@app.route('/v1/dynamicrecords/generaterecords',methods = ['GET'])
 def generate_records():
     records = int(request.args.get("records"))
+    student_data.clear()
     for i in range(0, records):
         new_student_data = {}
         new_student_data['id'] = i + 1  # randint(1, 1000)
@@ -78,7 +78,7 @@ def generate_records():
     return jsonify(records)
 
 
-@app.route('/getstudents',methods = ['GET'])
+@app.route('/v1/dynamicrecords/getstudents',methods = ['GET'])
 def get_students():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 100, type=int)

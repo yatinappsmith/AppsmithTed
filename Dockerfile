@@ -16,14 +16,7 @@ ENV MYSQL_USER=admin \
     REPLICATION_USER=replica \
     REPLICATION_PASS=replica
 ENV MONGODB_VERSION=5.0
-#    MONGODB_USER=admin \
-#    MONGODB_PASS=**Random** \
-#    MONGODB_DATABASE=admin \
-#    MONGODB_REPLICASET=**None**
 
-# install mariadb
-
-# install packages
 RUN apt-get update
 RUN apt-get install -y \
     apt-transport-https \
@@ -55,11 +48,6 @@ RUN mkdir /var/run/sshd
 ADD source.list /etc/apt/sources.list
 ADD 25norecommends /etc/apt/apt.conf.d/25norecommends
 
-# upgrade distro
-#RUN locale-gen en_US en_US.UTF-8
-#RUN apt-get update && apt-get upgrade -y
-#RUN apt-get install lsb-release -y
-
 # clean packages
 RUN apt-get clean
 RUN rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
@@ -76,12 +64,10 @@ RUN mkdir /docker-entrypoint-initdb.d
 ADD setupmysql.sh /setupmysql.sh
 RUN chmod +x /setupmysql.sh
 COPY my.cnf /etc/mysql/my.cnf
-#RUN /setupmysql.sh
 RUN /etc/init.d/mysql start &&\
     sleep 10 &&\
     echo "CREATE USER 'root'@'%' IDENTIFIED BY 'root';GRANT ALL ON *.* TO root@'%'; FLUSH PRIVILEGES" | mysql &&\
     echo "CREATE USER 'newuser'@'%' IDENTIFIED BY 'root_password';GRANT ALL ON *.* TO newuser@'%'; FLUSH PRIVILEGES" | mysql
-    #echo "SET PASSWORD FOR 'root'@localhost = PASSWORD(\"root\"); FLUSH PRIVILEGES" | mysql
 COPY mysql/mysqlinitdb.sql /tmp/mysqlinitdb.sql
 COPY populatemysql.sh /populatemysql.sh
 RUN /populatemysql.sh
@@ -103,14 +89,11 @@ RUN    /etc/init.d/postgresql start &&\
 # database are possible.
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/12/main/pg_hba.conf
 
-# And add ``listen_addresses`` to ``/etc/postgresql/12/main/postgresql.conf``
 RUN echo "listen_addresses='*'" >> /etc/postgresql/12/main/postgresql.conf
 COPY postgres/pgdump.sql /tmp/pgdump.sql
 COPY populatepostgres.sh /populatepostgres.sh
-#RUN chmod a+x /populatepostgres.sh
-RUN /populatepostgres.sh
 
-#RUN psql -U docker -d docker -f /tmp/pgdump.sql
+RUN /populatepostgres.sh
 
 USER root
 #configure mongodb
@@ -130,13 +113,7 @@ COPY restserver/startrestserver.sh /startrestserver.sh
 
 
 #Setup smtp server
-#COPY entrypoint.sh /bin/
-#COPY exim/set-exim4-update-conf.sh /bin/
 COPY exim/update-exim4.conf.conf /etc/exim4/update-exim4.conf.conf
-#COPY exim/set-exim4-update-conf.sh /bin/set-exim4-update-conf.sh
-#RUN chmod a+x /bin/set-exim4-update-conf.sh
-#COPY exim/setupexim4.sh /bin/setupexim4.sh
-#RUN chmod a+x /bin/setupexim4.sh
 
 #Setup Git server
 RUN ssh-keygen -A
@@ -145,29 +122,12 @@ RUN mkdir /git-server/keys
 RUN adduser  --shell /usr/bin/git-shell git 
 RUN echo git:12345 | chpasswd
 RUN mkdir /home/git/.ssh
-
-
 COPY git-server/git-shell-commands /home/git/git-shell-commands
 COPY git-server/sshd_config /etc/ssh/sshd_config
 COPY git-server/start.sh start.sh
 
-
-
-#RUN chmod a+x /bin/entrypoint.sh && 
-#RUN chmod a+x /bin/set-exim4-update-conf
-
-
-
-
-
-
-
-
-
 # Expose the port
 EXPOSE 3306 5432 3307 27017 5001 25 22
-
-
 
 COPY startupscript.sh /startupscript.sh
 RUN chmod +x /startupscript.sh
