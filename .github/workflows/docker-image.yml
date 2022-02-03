@@ -24,4 +24,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: user/app:latest
+          tags: yatinchaubal/ted1.0:latest
