@@ -93,7 +93,7 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/12/main/postgresql.conf
 COPY postgres/pgdump.sql /tmp/pgdump.sql
 COPY populatepostgres.sh /populatepostgres.sh
 
-RUN /populatepostgres.sh
+#RUN /populatepostgres.sh
 
 USER root
 #configure mongodb
