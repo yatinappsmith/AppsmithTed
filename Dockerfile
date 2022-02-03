@@ -70,7 +70,7 @@ COPY my.cnf /etc/mysql/my.cnf
 #    echo "CREATE USER 'newuser'@'%' IDENTIFIED BY 'root_password';GRANT ALL ON *.* TO newuser@'%'; FLUSH PRIVILEGES" | mysql
 COPY mysql/mysqlinitdb.sql /tmp/mysqlinitdb.sql
 COPY populatemysql.sh /populatemysql.sh
-RUN /populatemysql.sh
+#RUN /populatemysql.sh
 COPY mysql/startmysql.sh /startmysql.sh
 RUN chmod a+x /startmysql.sh
 
