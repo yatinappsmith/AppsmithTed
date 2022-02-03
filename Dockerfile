@@ -64,10 +64,10 @@ RUN mkdir /docker-entrypoint-initdb.d
 ADD setupmysql.sh /setupmysql.sh
 RUN chmod +x /setupmysql.sh
 COPY my.cnf /etc/mysql/my.cnf
-RUN /etc/init.d/mysql start &&\
-    sleep 10 &&\
-    echo "CREATE USER 'root'@'%' IDENTIFIED BY 'root';GRANT ALL ON *.* TO root@'%'; FLUSH PRIVILEGES" | mysql &&\
-    echo "CREATE USER 'newuser'@'%' IDENTIFIED BY 'root_password';GRANT ALL ON *.* TO newuser@'%'; FLUSH PRIVILEGES" | mysql
+#RUN /etc/init.d/mysql start &&\
+#    sleep 10 &&\
+#    echo "CREATE USER 'root'@'%' IDENTIFIED BY 'root';GRANT ALL ON *.* TO root@'%'; FLUSH PRIVILEGES" | mysql &&\
+#    echo "CREATE USER 'newuser'@'%' IDENTIFIED BY 'root_password';GRANT ALL ON *.* TO newuser@'%'; FLUSH PRIVILEGES" | mysql
 COPY mysql/mysqlinitdb.sql /tmp/mysqlinitdb.sql
 COPY populatemysql.sh /populatemysql.sh
 RUN /populatemysql.sh
